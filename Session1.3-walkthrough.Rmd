@@ -130,11 +130,6 @@ nrow(patients)
 dim(patients)
 ```
 
-- Or the structure of an object:
-     + TIP: In RStudio, window *Environment*, click the blue arrow in the left of an object's name, in order to see the object structure
-```{r}
-str(patients)
-```
 
 - The names of the columns are automatically assigned:
 
@@ -182,7 +177,7 @@ mean(patients$Height)
 
 - However, sometimes we have to tell the functions what to do with them. 
 - R has some built-in functions for dealing with `NA`s, and functions often have their own arguments (like `na.rm`) for handling them:
-
+    + annoyingly, different functions have different argument names to change their behaviour with regards to `NA` values. *Always check the documentation*
 
 ```{r}
 mean(patients$Height, na.rm = TRUE)
@@ -192,7 +187,8 @@ mean(na.omit(patients$Height))
 
 ##2. Analysis (reshaping data and maths)
 
-- Our analysis involves identifying patients with extreme BMI (defined as being two standard deviations from the mean)
+- Our analysis involves identifying patients with extreme BMI
+    + we will define this as being two standard deviations from the mean
 
 ```{r}
 # Create an index of results:
@@ -215,20 +211,35 @@ abline(h=upper.limit)
 - It is also useful to save the variable we have computed as a new column in the data frame
 
 ```{r}
-round(BMI,2)
+round(BMI,1)
 patients$BMI <- round(BMI,1)
 head(patients)
 ```
 
 - To actually select the candidates we can use a logical expression to test the values of the BMI vector being greater than the upper limit
-
+    + if the second line looks a bit weird, remember that `<-` is doing an assignment. The the value we are assigning to our new variable is the logical (`TRUE` or `FALSE`) vector giving by testing each item in `BMI` against the `upper.limit`
+    
 ```{r}
 BMI > upper.limit
 candidates <- BMI > upper.limit
 ```
 
+We have seen that a logical vector can be used to subset a data frame
+
+- However, in our case the result looks a bit funny
+- Can you think why this might be?
+
 ```{r}
 patients[candidates,]
+```
+
+The `which` function will take a logical vector and return the indices of the `TRUE` values
+
+- This can then be used to subset the data frame
+
+```{r}
+which(BMI > upper.limit)
+candidates <- which(BMI > upper.limit)
 ```
 
 
@@ -249,6 +260,22 @@ list.files() # list files in working directory
 
 ```
 
+
+To recap, the set of R commands we have used is:-
+
+```{r}
+patients <- read.delim("patient-info.txt")
+BMI <- (patients$Weight)/((patients$Height/100)^2)
+upper.limit <- mean(BMI,na.rm = TRUE) + 2*sd(BMI,na.rm = TRUE)
+plot(BMI)
+# Add a horizonal line:
+abline(h=upper.limit) 
+patients$BMI <- round(BMI,1)
+candidates <- which(BMI > upper.limit)
+write.csv(patients[candidates,], file="selectedSamples.csv")
+
+```
+
 ##Exercise: Exercise 3
 
 - A separate study is looking for patients that are underweight and also smoke; 
@@ -259,6 +286,7 @@ list.files() # list files in working directory
 
 ```{r}
 ### Your Answer Here ### 
+
 
 
 ```
